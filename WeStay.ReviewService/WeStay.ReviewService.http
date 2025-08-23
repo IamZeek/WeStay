@@ -1,0 +1,6 @@
+@WeStay.ReviewService_HostAddress = http://localhost:5183
+
+GET {{WeStay.ReviewService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

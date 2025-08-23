@@ -1,0 +1,6 @@
+@WeStay.NotificationService_HostAddress = http://localhost:5022
+
+GET {{WeStay.NotificationService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

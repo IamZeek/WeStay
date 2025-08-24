@@ -1,8 +1,33 @@
 {
   "Routes": [
-    // AuthService routes
     {
-      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamPathTemplate": "/api/v1/auth/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7005
+        }
+      ],
+      "UpstreamPathTemplate": "/api/v1/auth/{everything}",
+      "UpstreamHttpMethod": [ "POST", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/public/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7006
+        }
+      ],
+      "UpstreamPathTemplate": "/api/v1/public/{everything}",
+      "UpstreamHttpMethod": [ "GET", "OPTIONS" ]
+    },
+
+    // Private routes (require authentication)
+    {
+      "DownstreamPathTemplate": "/api/v1/messaging/{everything}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -10,7 +35,7 @@
           "Port": 7001
         }
       ],
-      "UpstreamPathTemplate": "/api/auth/{everything}",
+      "UpstreamPathTemplate": "/api/v1/messaging/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
@@ -95,8 +120,5 @@
       "UpstreamPathTemplate": "/api/public/listings/{everything}",
       "UpstreamHttpMethod": [ "GET" ]
     }
-  ],
-  "GlobalConfiguration": {
-    "BaseUrl": "https://localhost:7000"
-  }
+  ]
 }

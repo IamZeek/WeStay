@@ -447,7 +447,7 @@ namespace WeStay.AuthService.Controllers
 
         [HttpPost("verify-otp-email")]
         [Authorize]
-        public IActionResult VerifyOtp(string code)
+        public IActionResult VerifyOtpEmail(string code)
         {
             var email = User.FindFirst(ClaimTypes.Email)?.Value;
             if (_cache.TryGetValue(email, out string otp) && otp == code)

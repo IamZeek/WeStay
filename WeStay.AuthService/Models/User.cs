@@ -49,6 +49,8 @@ namespace WeStay.AuthService.Models
 
         [MaxLength(255)]
         public string? ExternalIssuer { get; set; }
+        public bool? IsEmailVerified { get; set; }
+        public bool? IsPhoneNoVerified { get; set; }
 
         public virtual Verification Verification { get; set; }
 

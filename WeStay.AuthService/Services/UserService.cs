@@ -57,5 +57,21 @@ namespace WeStay.AuthService.Services
         {
             return await _context.Users.AnyAsync(u => u.Email == email);
         }
+
+        public async Task<bool> UpdateUserStatusAsync(int id,string type)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+            if (user != null)
+                return false;
+            user.UpdatedAt = DateTime.UtcNow;
+            if(type == "Email")
+                user.IsEmailVerified = true;
+            if (type == "Phone")
+                user.IsPhoneNoVerified = true;
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+            return true;
+
+        }
     }
 }

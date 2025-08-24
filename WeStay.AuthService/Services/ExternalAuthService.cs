@@ -51,6 +51,7 @@ namespace WeStay.AuthService.Services
                     user.ExternalSubject = claims.FirstOrDefault(c => c.Type == "sub")?.Value;
                     user.ExternalIssuer = claims.FirstOrDefault(c => c.Type == "iss")?.Value;
                     user.UpdatedAt = DateTime.UtcNow;
+                    user.IsEmailVerified = true;
 
                     // Add to external logins history
                     _context.ExternalLogins.Add(new ExternalLogin
@@ -107,6 +108,7 @@ namespace WeStay.AuthService.Services
                 ExternalIssuer = claims.FirstOrDefault(c => c.Type == "iss")?.Value,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
+                IsEmailVerified = true,
                 IsActive = true
             };
 

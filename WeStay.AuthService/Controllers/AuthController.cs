@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using WeStay.AuthService.Models;
@@ -24,6 +26,9 @@ namespace WeStay.AuthService.Controllers
         private readonly IAuthService _authService;
         private readonly IUserService _userService;
         private readonly IVerificationService _verificationService;
+        private readonly IPhoneVerificationService _phoneVerificationService;
+        private readonly IEmailService _emailService;
+        private readonly IMemoryCache _cache;
 
         public AuthController(
             IConfiguration configuration,
@@ -32,7 +37,10 @@ namespace WeStay.AuthService.Controllers
             IJwtTokenGenerator jwtTokenGenerator,
             IAuthService authService,
             IUserService userService,
-            IVerificationService verificationService)
+            IVerificationService verificationService,
+            IPhoneVerificationService phoneVerificationService, 
+            IEmailService emailService,
+            IMemoryCache cache)
         {
             _configuration = configuration;
             _logger = logger;
@@ -41,6 +49,9 @@ namespace WeStay.AuthService.Controllers
             _authService = authService;
             _userService = userService;
             _verificationService = verificationService;
+            _phoneVerificationService = phoneVerificationService;
+            _emailService = emailService;
+            _cache = cache;
         }
 
         [HttpPost("register")]
@@ -267,7 +278,9 @@ namespace WeStay.AuthService.Controllers
                     user.DateOfBirth,
                     user.PhoneNumber,
                     user.CreatedAt,
-                    user.ExternalType
+                    user.ExternalType,
+                    user.IsPhoneNoVerified,
+                    user.IsEmailVerified
                 });
             }
             catch (Exception ex)
@@ -399,12 +412,50 @@ namespace WeStay.AuthService.Controllers
             }
         }
 
-        [HttpPost("logout")]
+        [HttpPost("send-otp-phone")]
         [Authorize]
-        public IActionResult Logout()
+        public async Task<IActionResult> SendOtpPhone([FromBody] string phoneNumber)
         {
-            // This endpoint is provided for consistency with authentication flows
-            return Ok(new { Message = "Logout successful" });
+            await _phoneVerificationService.SendOtpAsync(phoneNumber);
+            return Ok(new { Message = "OTP sent successfully" });
+        }
+
+        [HttpPost("verify-otp-phone")]
+        [Authorize]
+        public async Task<IActionResult> VerifyOtpPhone([FromBody] dynamic request,int userId)
+        {
+            string phoneNumber = request.phoneNumber;
+            string otp = request.otp;
+
+            var isValid = await _phoneVerificationService.VerifyOtp(phoneNumber, otp, userId);
+            if (!isValid)
+                return BadRequest(new { Message = "Invalid OTP" });
+            
+            return Ok(new { Message = "Phone verified successfully" });
+        }
+
+        [HttpPost("send-otp-email")]
+        [Authorize]
+        public async Task<IActionResult> SendOtpEmail()
+        {
+            var otp = new Random().Next(100000, 999999).ToString();
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            _cache.Set(email, otp, TimeSpan.FromMinutes(5)); // store OTP for 5 minutes
+            await _emailService.SendOtpAsync(email, otp);
+            return Ok(new { message = "OTP sent to email." });
+        }
+
+        [HttpPost("verify-otp-email")]
+        [Authorize]
+        public IActionResult VerifyOtpEmail(string code)
+        {
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (_cache.TryGetValue(email, out string otp) && otp == code)
+            {
+                _cache.Remove(email);
+                return Ok(new { message = "OTP verified successfully." });
+            }
+            return BadRequest(new { message = "Invalid or expired OTP." });
         }
 
 

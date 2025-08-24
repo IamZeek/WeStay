@@ -20,6 +20,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IExternalAuthService, ExternalAuthService>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IVerificationService, VerificationService>();
+builder.Services.AddScoped<IPhoneVerificationService, PhoneVerificationService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 
 // Configure JWT Authentication
@@ -76,6 +78,8 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RequireGuestRole", policy => policy.RequireRole("Guest"));
     options.AddPolicy("RequireHostRole", policy => policy.RequireRole("Host", "Guest"));
 });
+
+builder.Services.AddMemoryCache();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -12,8 +12,8 @@ using WeStay.AuthService.Data;
 namespace WeStay.AuthService.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    [Migration("20250823061136_AddInitialMigration")]
-    partial class AddInitialMigration
+    [Migration("20250823201358_AddInitialMigrtion")]
+    partial class AddInitialMigrtion
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
